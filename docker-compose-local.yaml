@@ -2,7 +2,7 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.de.\docker-compose-local.yamlv
+      dockerfile: Dockerfile.dev
     container_name: backend
     restart: always
     environment:
@@ -19,7 +19,7 @@ services:
       - custom
     volumes:
       - ./backend:/app
-      - ./app/alembic/versions:/app/alembic/versions
+      - ./app/alembic/versions:/app/alembic/versions # Ensure migrations are up-to-date
 
   db:
     image: postgres:16-alpine

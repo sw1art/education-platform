@@ -6,7 +6,7 @@ from pydantic import Field
 
 class Settings(BaseSettings):
     REAL_DATABASE_URL: str = Field(
-        "postgresql+asyncpg://postgres:postgres@0.0.0.0:5432/education_db",
+        "postgresql+asyncpg://postgres:postgres@db:5432/education_db",
         env="REAL_DATABASE_URL"
         )
     APP_PORT: int = Field(
@@ -30,7 +30,7 @@ class Settings(BaseSettings):
         env="SENTRY_URL"
         )
     TEST_DATABASE_URL: str = Field(
-        "postgresql+asyncpg://postgres_test:postgres_test@0.0.0.0:5433/postgres_test", 
+        "postgresql+asyncpg://postgres_test:postgres_test@test_db:5433/postgres_test", 
         env="TEST_DATABASE_URL"
         )
     DEBUG: bool = Field(
