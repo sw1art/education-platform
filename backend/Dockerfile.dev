@@ -1,0 +1,28 @@
+FROM python:3.13-slim
+
+# Установка системных зависимостей
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    libpq-dev \
+    postgresql-client \
+    libssl-dev \
+    && apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Установка рабочей директории
+WORKDIR /app
+
+# Копирование зависимостей и установка
+COPY requirements-dev.txt .
+
+RUN pip install --upgrade pip && \
+    pip install --no-cache-dir -r requirements-dev.txt
+
+# Копирование остальных файлов
+COPY . .
+
+# Команда по умолчанию (запуск)
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+
