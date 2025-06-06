@@ -3,7 +3,7 @@ from uuid import UUID
 
 from fastapi import HTTPException
 
-from api.user.schemas import ShowUser, UserCreate
+from db.user.schemas import ShowUser, UserCreate
 from db.user.dals import UserDAL
 from db.user.models import PortalRole, User
 from hashing import Hasher
@@ -15,6 +15,7 @@ async def _create_new_user(body: UserCreate, session) -> ShowUser:
         user = await user_dal.create_user(
             name=body.name,
             surname=body.surname,
+            username=body.username,
             email=body.email,
             hashed_password=Hasher.get_password_hash(body.password),
             roles=[
@@ -25,6 +26,7 @@ async def _create_new_user(body: UserCreate, session) -> ShowUser:
             user_id=user.user_id,
             name=user.name,
             surname=user.surname,
+            username=user.username,
             email=user.email,
             is_active=user.is_active,
         )
@@ -61,15 +63,14 @@ async def _get_user_by_id(user_id, session) -> Union[User, None]:
 
 
 def check_user_permissions(target_user: User, current_user: User) -> bool:
-    if PortalRole.ROLE_PORTAL_SUPERADMIN in current_user.roles:
+    if PortalRole.ROLE_PORTAL_ADMIN in current_user.roles:
         raise HTTPException(
-            status_code=406, detail="Superadmin cannot be deleted via API."
+            status_code=406, detail="Admin cannot be deleted via API."
         )
     if target_user.user_id != current_user.user_id:
         # check admin role
         if not {
-            PortalRole.ROLE_PORTAL_ADMIN,
-            PortalRole.ROLE_PORTAL_SUPERADMIN,
+            PortalRole.ROLE_PORTAL_ADMIN
         }.intersection(current_user.roles):
             return False
         # check admin deactivate superadmin attempt

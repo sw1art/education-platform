@@ -14,7 +14,7 @@ class Settings(BaseSettings):
         env="APP_PORT"
         )
     SECRET_KEY: str = Field(
-        "secret_key", 
+        "secret_key_for_jwt_token", 
         env="SECRET_KEY"
         )
     ALGORITHM: str = Field(

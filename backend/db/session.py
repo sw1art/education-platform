@@ -1,21 +1,31 @@
 from typing import Generator
+from datetime import datetime
 
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.asyncio import create_async_engine
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.orm import declarative_base
+from sqlalchemy import func
+from sqlalchemy.ext.asyncio import (
+    AsyncAttrs, 
+    async_sessionmaker, 
+    create_async_engine, 
+    AsyncSession
+    )
+from sqlalchemy.orm import (
+    sessionmaker, 
+    Mapped, 
+    mapped_column, 
+    DeclarativeBase
+    )
+
 from settings import settings
 
-##############################################
-# BLOCK FOR COMMON INTERACTION WITH DATABASE #
-##############################################
 
+class Base(AsyncAttrs, DeclarativeBase):
+    created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(server_default=func.now(), onupdate=func.now())
 
-Base = declarative_base()
 
 # create async engine for interaction with database
 engine = create_async_engine(
-    settings.REAL_DATABASE_URL,
+    settings.REAL_DATABASE_URL, 
     future=True,
     echo=True,
     execution_options={"isolation_level": "AUTOCOMMIT"},
