@@ -1,18 +1,10 @@
 from typing import Union
 from uuid import UUID
 
-from sqlalchemy import and_
-from sqlalchemy import select
-from sqlalchemy import update
+from sqlalchemy import and_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from db.models import PortalRole
-from db.models import User
-
-
-###########################################################
-# BLOCK FOR INTERACTION WITH DATABASE IN BUSINESS CONTEXT #
-###########################################################
+from db.user.models import PortalRole, User
 
 
 class UserDAL:
@@ -25,6 +17,7 @@ class UserDAL:
         self,
         name: str,
         surname: str,
+        username: str,
         email: str,
         hashed_password: str,
         roles: list[PortalRole],
@@ -32,6 +25,7 @@ class UserDAL:
         new_user = User(
             name=name,
             surname=surname,
+            username=username,
             email=email,
             hashed_password=hashed_password,
             roles=roles,
@@ -48,32 +42,31 @@ class UserDAL:
             .returning(User.user_id)
         )
         res = await self.db_session.execute(query)
-        deleted_user_id_row = res.fetchone()
-        if deleted_user_id_row is not None:
-            return deleted_user_id_row[0]
+        deleted_user_id = res.scalar_one_or_none()
+        return deleted_user_id
 
     async def get_user_by_id(self, user_id: UUID) -> Union[User, None]:
-        query = select(User).where(User.user_id == user_id)
-        res = await self.db_session.execute(query)
-        user_row = res.fetchone()
-        if user_row is not None:
-            return user_row[0]
+        res = await self.db_session.execute(select(User).where(User.user_id == user_id))
+        return res.scalar_one_or_none()
 
     async def get_user_by_email(self, email: str) -> Union[User, None]:
-        query = select(User).where(User.email == email)
-        res = await self.db_session.execute(query)
-        user_row = res.fetchone()
-        if user_row is not None:
-            return user_row[0]
+        res = await self.db_session.execute(select(User).where(User.email == email))
+        return res.scalar_one_or_none()
+
+    async def get_user_by_username(self, username: str) -> Union[User, None]:
+        res = await self.db_session.execute(select(User).where(User.username == username))
+        return res.scalar_one_or_none()
 
     async def update_user(self, user_id: UUID, **kwargs) -> Union[UUID, None]:
+        if not kwargs:
+            return None
+
         query = (
             update(User)
             .where(and_(User.user_id == user_id, User.is_active == True))
-            .values(kwargs)
+            .values(**kwargs)
             .returning(User.user_id)
         )
         res = await self.db_session.execute(query)
-        update_user_id_row = res.fetchone()
-        if update_user_id_row is not None:
-            return update_user_id_row[0]
+        updated_user_id = res.scalar_one_or_none()
+        return updated_user_id

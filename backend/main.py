@@ -5,9 +5,9 @@ from fastapi.routing import APIRouter
 # from starlette_exporter import PrometheusMiddleware
 
 from settings import settings
-from api.handlers import user_router
-from api.login_handler import login_router
-from api.service import service_router
+from api.user.handlers import user_router
+from api.user.login_handler import login_router
+from api.user.service import service_router
 
 # sentry configuration
 # sentry_sdk.init(

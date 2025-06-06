@@ -3,11 +3,9 @@ from uuid import UUID
 
 from fastapi import HTTPException
 
-from api.schemas import ShowUser
-from api.schemas import UserCreate
-from db.dals import UserDAL
-from db.models import PortalRole
-from db.models import User
+from api.user.schemas import ShowUser, UserCreate
+from db.user.dals import UserDAL
+from db.user.models import PortalRole, User
 from hashing import Hasher
 
 

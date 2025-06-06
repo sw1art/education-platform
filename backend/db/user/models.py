@@ -1,18 +1,11 @@
 import uuid
 from enum import Enum
 
-from sqlalchemy import Boolean
-from sqlalchemy import Column
-from sqlalchemy import String
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Boolean, Column, String
+from sqlalchemy.dialects.postgresql import ARRAY, UUID
+from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.orm import declarative_base
-
-##############################
-# BLOCK WITH DATABASE MODELS #
-##############################
-
-Base = declarative_base()
+from db.session import Base
 
 
 class PortalRole(str, Enum):
@@ -27,10 +20,11 @@ class User(Base):
     user_id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String, nullable=False)
     surname = Column(String, nullable=False)
+    username = Column(String, nullable=False, unique=True)
     email = Column(String, nullable=False, unique=True)
     is_active = Column(Boolean(), default=True)
     hashed_password = Column(String, nullable=False)
-    roles = Column(ARRAY(String), nullable=False)
+    roles = Column(MutableList.as_mutable(ARRAY(String)), nullable=False, default=[])
 
     @property
     def is_superadmin(self) -> bool:
@@ -42,8 +36,11 @@ class User(Base):
 
     def enrich_admin_roles_by_admin_role(self):
         if not self.is_admin:
-            return {*self.roles, PortalRole.ROLE_PORTAL_ADMIN}
+            self.roles.append(PortalRole.ROLE_PORTAL_ADMIN)
 
     def remove_admin_privileges_from_model(self):
         if self.is_admin:
-            return {role for role in self.roles if role != PortalRole.ROLE_PORTAL_ADMIN}
+            self.roles = [role for role in self.roles if role != PortalRole.ROLE_PORTAL_ADMIN]
+
+    def __repr__(self):
+        return f"<User {self.username} ({self.email}) | Roles: {self.roles}>"

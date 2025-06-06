@@ -3,12 +3,15 @@ from typing import Generator
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy.orm import declarative_base
 from settings import settings
 
 ##############################################
 # BLOCK FOR COMMON INTERACTION WITH DATABASE #
 ##############################################
+
+
+Base = declarative_base()
 
 # create async engine for interaction with database
 engine = create_async_engine(
